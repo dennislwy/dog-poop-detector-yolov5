@@ -3,6 +3,7 @@ yolov5/
 labelImg/
 data/
 *.cache
+test-rtsp-*.ps1
 .vscode
 .ipynb_checkpoints
 .pytest_cache
