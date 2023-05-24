@@ -1,0 +1,16 @@
+*.pt
+yolov5/
+labelImg/
+data/
+*.cache
+.vscode
+.ipynb_checkpoints
+.pytest_cache
+**/__pycache__
+venv/*
+.idea/
+log/
+*.log
+settings.cfg
+*.pkl
+docs/*
