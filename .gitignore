@@ -1,8 +1,8 @@
 *.pt
 yolov5/
 labelImg/
-data/
-data.zip
+dataset/
+dataset.zip
 *.cache
 test-rtsp-*.ps1
 .vscode
