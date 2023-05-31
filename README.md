@@ -4,7 +4,7 @@
 - [x] Live detect when dog pooped
     - [x] Play alert sound
     - [x] Send notification via Pushbullet
-        - [ ] Attach detection image in notification
+        - [x] Attach detection image in notification
 - [ ] Deployable to Raspberry Pi
 
 ## Live Detection Sample
