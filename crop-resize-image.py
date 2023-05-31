@@ -93,7 +93,7 @@ def get_output_filename(input_file, output, prefix, suffix):
 
 def get_output_dir(input_dir, output, suffix):
     # output is a folder
-    if not os.path.splitext(output)[1]:
+    if output and not os.path.splitext(output)[1]:
         return output
     else:
         return f"{input_dir}-{suffix}"
