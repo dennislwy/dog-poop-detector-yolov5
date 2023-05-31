@@ -15,4 +15,3 @@ venv/*
 log/
 *.log
 *.pkl
-docs/*

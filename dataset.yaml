@@ -1,9 +1,9 @@
-path: /content/drive/MyDrive/git/poop-detector-yolov5/dataset
+path: /content/drive/MyDrive/git/dog-poop-detector-yolov5/dataset
 train: images
 val: images
 
 # Classes
 nc: 2
 names:
-  0: oreo
+  0: dog
   1: poop
