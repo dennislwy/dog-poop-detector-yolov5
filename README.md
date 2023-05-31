@@ -1,6 +1,7 @@
 # Dog Poop Detector using YOLOv5
 
 ## Objectives
-[ ] Detect when dog pooped
-[ ] Play alert sound
-[ ] Send notification via Pushbullet
+[x] Detect when dog pooped
+[x] Play alert sound
+[x] Send notification via Pushbullet
+[ ] Attach detection image in notification
