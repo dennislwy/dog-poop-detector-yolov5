@@ -1,4 +1,4 @@
-path: ../dataset
+path: /content/drive/MyDrive/git/poop-detector-yolov5/dataset
 train: images
 val: images
 

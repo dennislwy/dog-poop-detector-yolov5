@@ -1,10 +1,10 @@
 *.pt
-yolov5/
-labelImg/
 dataset/
+runs/
 dataset.zip
+live.bat
+todo.txt
 *.cache
-test-rtsp-*.ps1
 .vscode
 .ipynb_checkpoints
 .pytest_cache
@@ -13,6 +13,6 @@ venv/*
 .idea/
 log/
 *.log
-settings.cfg
+settings.json
 *.pkl
 docs/*

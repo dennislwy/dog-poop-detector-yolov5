@@ -2,4 +2,5 @@
 
 ## Objectives
 [ ] Detect when dog pooped
-[ ] Send telegram notification
+[ ] Play alert sound
+[ ] Send notification via Pushbullet
