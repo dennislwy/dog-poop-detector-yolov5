@@ -2,6 +2,7 @@
 dataset/
 runs/
 dataset.zip
+dataset-*.yaml
 config-*.json
 live.bat
 live.sh
