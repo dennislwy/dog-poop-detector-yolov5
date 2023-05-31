@@ -1,6 +1,7 @@
 *.pt
 dataset/
 runs/
+temp/
 dataset.zip
 dataset-*.yaml
 config-*.json

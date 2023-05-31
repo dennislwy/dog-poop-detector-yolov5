@@ -110,9 +110,6 @@ def run(
         # Second-stage classifier (optional)
         # pred = utils.general.apply_classifier(pred, classifier_model, im, im0s)
 
-        # process detections
-        detector.process_detections(pred)
-
         # Process predictions
         for i, det in enumerate(pred):  # per image
             seen += 1
@@ -155,6 +152,10 @@ def run(
 
             # Stream results
             im0 = annotator.result()
+
+            # process detection
+            detector.process_detection(pred, im0)
+
             if view_img:
                 if platform.system() == 'Linux' and p not in windows:
                     windows.append(p)
