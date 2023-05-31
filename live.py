@@ -17,7 +17,6 @@ from yolov5.utils.general import (LOGGER, Profile, check_file, check_img_size, c
 from yolov5.utils.plots import Annotator, colors, save_one_box
 from yolov5.utils.torch_utils import select_device, smart_inference_mode
 
-
 def run(
         detector: PoopDetector,  # poop detector
         weights='yolov5s.pt',  # model path or triton URL
@@ -184,16 +183,16 @@ def run(
                     vid_writer[i].write(im0)
 
         # Print time (inference-only)
-    #     LOGGER.info(f"{s}{'' if len(det) else '(no detections), '}{dt[1].dt * 1E3:.1f}ms")
+        LOGGER.info(f"{s}{'' if len(det) else '(no detections), '}{dt[1].dt * 1E3:.1f}ms")
 
-    # # Print results
-    # t = tuple(x.t / seen * 1E3 for x in dt)  # speeds per image
-    # LOGGER.info(f'Speed: %.1fms pre-process, %.1fms inference, %.1fms NMS per image at shape {(1, 3, *imgsz)}' % t)
-    # if save_txt or save_img:
-    #     s = f"\n{len(list(save_dir.glob('labels/*.txt')))} labels saved to {save_dir / 'labels'}" if save_txt else ''
-    #     LOGGER.info(f"Results saved to {colorstr('bold', save_dir)}{s}")
-    # if update:
-    #     strip_optimizer(weights[0])  # update model (to fix SourceChangeWarning)
+    # Print results
+    t = tuple(x.t / seen * 1E3 for x in dt)  # speeds per image
+    LOGGER.info(f'Speed: %.1fms pre-process, %.1fms inference, %.1fms NMS per image at shape {(1, 3, *imgsz)}' % t)
+    if save_txt or save_img:
+        s = f"\n{len(list(save_dir.glob('labels/*.txt')))} labels saved to {save_dir / 'labels'}" if save_txt else ''
+        LOGGER.info(f"Results saved to {colorstr('bold', save_dir)}{s}")
+    if update:
+        strip_optimizer(weights[0])  # update model (to fix SourceChangeWarning)
 
 def set_logger(debug=False):
     log_name = os.path.basename(__file__).rsplit('.', 1)[0]
@@ -214,7 +213,7 @@ def parse_opt():
     parser.add_argument('--no-alert', action='store_true', help='disable alert sound')
     parser.add_argument('--no-notify', action='store_true', help='disable push notification')
     parser.add_argument('--notify-img', action='store_true', help='attach detection image in push notification')
-    # parser.add_argument('--cfg', type=str, default='settings.json', help='configuration file')
+    parser.add_argument('--cfg', type=str, default='config.json', help='configuration file')
 
     parser.add_argument('--weights', nargs='+', type=str, default='poop.pt', help='model path or triton URL')
     parser.add_argument('--source', type=str, default='0', help='file/dir/URL/glob/screen/0(webcam)')
@@ -249,25 +248,25 @@ def parse_opt():
     return opt
 
 def main(opt):
-    # poop detector
+    # initialize poop detector
     detector = PoopDetector(sound=opt.sound, no_alert=opt.no_alert, notify_img=opt.notify_img, no_notify=opt.no_notify, notifier=notifier, logger=log)
 
-    # remove arguments from opt
+    # remove unused arguments from opt
+    del opt.cfg
     del opt.sound
     del opt.no_alert
     del opt.no_notify
     del opt.notify_img
 
-
     while True:
         to_notify = True
 
         try:
-            log.info('Starting detector')
+            log.info("Starting detector")
             run(detector=detector, **vars(opt))
 
         except KeyboardInterrupt:
-            msg = "Detector terminated by user"
+            msg = "Application terminated by user"
             log.warning(msg)
             to_notify = False
             break
@@ -280,15 +279,22 @@ def main(opt):
         notifier.text(msg)
 
 if __name__ == '__main__':
-    log = set_logger(debug=True)
+    log = set_logger(debug=False)
 
-    log.info('Loading config file')
-    with open('settings.json') as f:
-        cfg = json.load(f)
+    try:
+        opt = parse_opt()
 
-    # notification
-    notifier_api_key = cfg['pushbullet']['api']['key']
-    notifier: INotification = PushbulletNotification(api_key=notifier_api_key, title="Poop Detector")
+        log.info('Loading configuration file')
+        with open(opt.cfg) as f:
+            cfg = json.load(f)
 
-    opt = parse_opt()
-    main(opt)
+        # initialize notifier
+        notifier: INotification = PushbulletNotification(api_key=cfg['pushbullet']['apikey'], title="Poop Detector")
+
+        for key, value in opt.__dict__.items():
+            log.debug(f'{key}: {value}')
+
+        main(opt)
+
+    except Exception as e:
+        log.error(e, exc_info=True)

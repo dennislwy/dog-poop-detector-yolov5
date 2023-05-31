@@ -37,11 +37,8 @@ class PushbulletNotification(INotification):
         global log
         log = kwargs.get('logger', logging.getLogger())
 
-        try:
-            self._title = kwargs.get('title', None)
-            self._n = Pushbullet(api_key)
-        except Exception as e:
-            log.error(e, exc_info=True)
+        self._title = kwargs.get('title', None)
+        self._n = Pushbullet(api_key)
 
     @property
     def title(self):

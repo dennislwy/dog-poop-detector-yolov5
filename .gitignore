@@ -2,8 +2,9 @@
 dataset/
 runs/
 dataset.zip
+config-*.json
 live.bat
-todo.txt
+live.sh
 *.cache
 .vscode
 .ipynb_checkpoints
@@ -13,6 +14,5 @@ venv/*
 .idea/
 log/
 *.log
-settings.json
 *.pkl
 docs/*
