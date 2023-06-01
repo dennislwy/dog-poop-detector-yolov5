@@ -1,5 +1,6 @@
 import os
 import time
+import math
 import threading
 import numpy as np
 from datetime import datetime
@@ -23,13 +24,13 @@ class PoopDetector:
 
         self.notify_img = notify_img
 
-        self.fps = 5
+        self.fps = 3
         self.seconds_to_confirm_poop = 3
 
         self.poop_confirm_threshold = 0.75
 
         # poop detection rolling window
-        queue_length = self.fps*self.seconds_to_confirm_poop
+        queue_length = math.ceil(self.fps*self.seconds_to_confirm_poop)
         self.poop_detect_queue = deque([0] * queue_length, maxlen=queue_length)
 
         # poop detection rolling average
