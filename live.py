@@ -215,10 +215,9 @@ def parse_opt():
     parser.add_argument('--no-notify', action='store_true', help='disable push notification')
     parser.add_argument('--notify-img', action='store_true', help='attach detection image in push notification')
     parser.add_argument('--cfg', type=str, default='config.json', help='configuration file')
-    parser.add_argument('--confirm-sec', type=float, default=3, help='time to confirm if there is poop')
+    parser.add_argument('--confirm-sec', type=float, default=2, help='time to confirm if there is poop')
     parser.add_argument('--confirm-thres', type=float, default=0.75, help='poop confirmation threshold')
     parser.add_argument('--alert-grace-sec', type=int, default=900, help='poop alert grace period (in seconds)')
-
 
     parser.add_argument('--weights', nargs='+', type=str, default='poop.pt', help='model path or triton URL')
     parser.add_argument('--source', type=str, default='0', help='file/dir/URL/glob/screen/0(webcam)')
