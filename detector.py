@@ -58,16 +58,13 @@ class PoopDetector:
         fps = self.measure_fps()
 
         # dynamically adjust detect queue length
-        if self._queue_length  == 0 and fps > 0:
-            self._queue_length  = max(6, math.ceil(fps*self._poop_confirm_seconds))
-            self._poop_detect_queue = deque([0] * self._queue_length , maxlen=self._queue_length)
-            self.log.info(f"Queue length adjusted to {self._queue_length}")
+        if self._queue_length == 0 and fps > 0:
+            self.reset_queue()
 
         poop_in_detections = self.is_poop_in_detections(pred)
         dog_in_detections = self.is_dog_in_detections(pred)
 
-        if fps > 0:
-            print(f'{datetime.now().strftime("%Y%m%d %H:%M:%S.%f")[:-3]}, Dog: {dog_in_detections}, Poop: {poop_in_detections}, fps: {fps}')
+        print(f'{datetime.now().strftime("%Y%m%d %H:%M:%S.%f")[:-3]}, Dog: {dog_in_detections}, Poop: {poop_in_detections}, fps: {fps}')
 
         # add poop in detection to rolling window
         self._poop_detect_queue.append(1 if poop_in_detections else 0)
@@ -110,12 +107,20 @@ class PoopDetector:
     def is_poop_in_detections(self, pred):
         return CLASS_POOP in pred[0][:, -1]
 
+    def reset_queue(self):
+        new_queue_length = max(6, math.ceil(self.fps*self._poop_confirm_seconds))
+        if self._queue_length != new_queue_length:
+            self.log.info(f"FPS: {self.fps}, queue length adjusted to {new_queue_length}")
+
+        self._queue_length  = new_queue_length
+        self._poop_detect_queue = deque([0] * new_queue_length , maxlen=new_queue_length)
+
     def check_poop_confirmation(self):
         # update poop detection rolling average
         self._rolling_avg.update(np.mean(self._poop_detect_queue))
 
         # return if average value no change or queue yet fully fill
-        if not self._rolling_avg.changed() or len(self._poop_detect_queue) != self.fps*self._poop_confirm_seconds:
+        if not self._rolling_avg.changed(): #or len(self._poop_detect_queue) != self.fps*self._poop_confirm_seconds:
             return False
 
         # log poop likelihood
@@ -126,7 +131,8 @@ class PoopDetector:
             return False
 
         # clear once poop confirmed, helps w/ trailing additional poop detections due to filled queue
-        self._poop_detect_queue.clear()
+        # self._poop_detect_queue.clear()
+        self.reset_queue()
 
         # poop confirmed
         return True
