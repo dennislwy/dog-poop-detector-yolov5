@@ -14,54 +14,95 @@ CLASS_DOG = 0 # dog detection class
 CLASS_POOP = 1 # poop detection class
 
 class PoopDetector:
-    def __init__(self, sound, no_alert, notify_img, no_notify, notifier: INotification, logger):
+    def __init__(self,
+                 sound,
+                 no_alert,
+                 notify_img,
+                 no_notify,
+                 notifier: INotification,
+                 logger,
+                 confirm_sec = 3, # time to confirm if there is poop
+                 confirm_thres = 0.75, # poop confirmation threshold
+                 alert_grace_sec = 900, # alert grace period (in seconds)
+        ):
+
         self.log = logger
         self.notifier = notifier
         self.sound = sound
 
+        # for alert & notification
         self.no_alert = no_alert
         self.no_notify = no_notify
-
         self.notify_img = notify_img
+        self._alert_grace_period_seconds = alert_grace_sec
 
-        self.fps = 3
-        self.seconds_to_confirm_poop = 3
+        # for measuring fps
+        self.fps = 0.0
+        self._fps_cnt = 0
+        self._fps_measure_start = 0
 
-        self.poop_confirm_threshold = 0.75
+        # for poop confirmation
+        self._poop_confirm_seconds = confirm_sec
+        self._poop_confirm_threshold = confirm_thres
 
-        # poop detection rolling window
-        queue_length = math.ceil(self.fps*self.seconds_to_confirm_poop)
-        self.poop_detect_queue = deque([0] * queue_length, maxlen=queue_length)
+        # for poop detection rolling window
+        self._queue_length = 0
+        self._poop_detect_queue = deque([0] * 2, maxlen=2)
 
-        # poop detection rolling average
-        self.rolling_avg = ValueTracker(initial_value=0)
-
-        self.last_poop_check_time = time.time()
-
-        self.alert_grace_period_seconds = 900 # 15 minutes (in seconds)
-
-        self.last_poop_confirmed_time = 0
+        # for poop detection rolling average
+        self._rolling_avg = ValueTracker(initial_value=0)
+        self._last_poop_check_time = time.time()
+        self._last_poop_confirmed_time = 0
 
     def process_detection(self, pred, im0):
+        fps = self.measure_fps()
+
+        # dynamically adjust detect queue length
+        if self._queue_length  == 0 and fps > 0:
+            self._queue_length  = max(6, math.ceil(fps*self._poop_confirm_seconds))
+            self._poop_detect_queue = deque([0] * self._queue_length , maxlen=self._queue_length)
+            self.log.info(f"Queue length adjusted to {self._queue_length}")
+
         poop_in_detections = self.is_poop_in_detections(pred)
         dog_in_detections = self.is_dog_in_detections(pred)
 
-        print(f'{datetime.now().strftime("%Y%m%d %H:%M:%S.%f")[:-3]}, Dog: {dog_in_detections}, Poop: {poop_in_detections}')
+        if fps > 0:
+            print(f'{datetime.now().strftime("%Y%m%d %H:%M:%S.%f")[:-3]}, Dog: {dog_in_detections}, Poop: {poop_in_detections}, fps: {fps}')
 
         # add poop in detection to rolling window
-        self.poop_detect_queue.append(1 if poop_in_detections else 0)
+        self._poop_detect_queue.append(1 if poop_in_detections else 0)
 
         # is time to check rolling average?
-        if time.time() < self.last_poop_check_time + self.seconds_to_confirm_poop:
+        if time.time() < self._last_poop_check_time + self._poop_confirm_seconds:
             return
 
         # update last poop check time
-        self.last_poop_check_time = time.time()
+        self._last_poop_check_time = time.time()
 
         # confirm got poop?
         if self.check_poop_confirmation():
             # poop confirmed
             self.poop_confirmed(im0)
+
+    def measure_fps(self) -> float:
+        """
+        Measures frames per second (FPS) of a process.
+
+        Returns:
+            float: Current FPS value.
+        """
+        self._fps_cnt += 1  # Increment frame count by 1
+
+        if self._fps_cnt == 1:  # If it's the first frame
+            self._fps_measure_start = time.time()  # Start measuring time
+
+        elapsed = time.time() - self._fps_measure_start  # Calculate elapsed time since measurement started
+
+        if elapsed > 10:  # If more than 10 seconds have passed
+            self.fps = round(self._fps_cnt / elapsed, 2)  # Calculate FPS by dividing frame count by elapsed time
+            self._fps_cnt = 0  # Reset frame count for the next measurement
+
+        return self.fps  # Return the current FPS value
 
     def is_dog_in_detections(self, pred):
         return CLASS_DOG in pred[0][:, -1]
@@ -71,21 +112,21 @@ class PoopDetector:
 
     def check_poop_confirmation(self):
         # update poop detection rolling average
-        self.rolling_avg.update(np.mean(self.poop_detect_queue))
+        self._rolling_avg.update(np.mean(self._poop_detect_queue))
 
         # return if average value no change or queue yet fully fill
-        if not self.rolling_avg.changed() or len(self.poop_detect_queue) != self.fps*self.seconds_to_confirm_poop:
+        if not self._rolling_avg.changed() or len(self._poop_detect_queue) != self.fps*self._poop_confirm_seconds:
             return False
 
         # log poop likelihood
-        self.log.info(f'Poop likelihood: {round(self.rolling_avg.current*100, 2)}%')
+        self.log.info(f'Poop likelihood: {round(self._rolling_avg.current*100, 2)}%')
 
         # poop confirmed when poop detection rolling average >= poop confirmation threshold
-        if self.rolling_avg.current < self.poop_confirm_threshold:
+        if self._rolling_avg.current < self._poop_confirm_threshold:
             return False
 
         # clear once poop confirmed, helps w/ trailing additional poop detections due to filled queue
-        self.poop_detect_queue.clear()
+        self._poop_detect_queue.clear()
 
         # poop confirmed
         return True
@@ -94,13 +135,13 @@ class PoopDetector:
         self.log.info("Poop confirmed")
 
         # calculate elapsed time (in seconds) since last poop confirmation
-        last_poop_confirmed_elapsed_seconds = time.time() - self.last_poop_confirmed_time
+        last_poop_confirmed_elapsed_seconds = time.time() - self._last_poop_confirmed_time
 
         # update poop last confirmed time
-        self.last_poop_confirmed_time = time.time()
+        self._last_poop_confirmed_time = time.time()
 
         # sound alert & send notification if exceeded alert grace period since last poop confirmed time
-        if last_poop_confirmed_elapsed_seconds >= self.alert_grace_period_seconds:
+        if last_poop_confirmed_elapsed_seconds >= self._alert_grace_period_seconds:
 
             # play alert sound on another thread
             if not self.no_alert:

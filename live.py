@@ -215,6 +215,10 @@ def parse_opt():
     parser.add_argument('--no-notify', action='store_true', help='disable push notification')
     parser.add_argument('--notify-img', action='store_true', help='attach detection image in push notification')
     parser.add_argument('--cfg', type=str, default='config.json', help='configuration file')
+    parser.add_argument('--confirm-sec', type=float, default=3, help='time to confirm if there is poop')
+    parser.add_argument('--confirm-thres', type=float, default=0.75, help='poop confirmation threshold')
+    parser.add_argument('--alert-grace-sec', type=int, default=900, help='poop alert grace period (in seconds)')
+
 
     parser.add_argument('--weights', nargs='+', type=str, default='poop.pt', help='model path or triton URL')
     parser.add_argument('--source', type=str, default='0', help='file/dir/URL/glob/screen/0(webcam)')
@@ -250,7 +254,15 @@ def parse_opt():
 
 def main(opt):
     # initialize poop detector
-    detector = PoopDetector(sound=opt.sound, no_alert=opt.no_alert, notify_img=opt.notify_img, no_notify=opt.no_notify, notifier=notifier, logger=log)
+    detector = PoopDetector(sound=opt.sound,
+                            no_alert=opt.no_alert,
+                            notify_img=opt.notify_img,
+                            no_notify=opt.no_notify,
+                            notifier=notifier,
+                            logger=log,
+                            confirm_sec=opt.confirm_sec,
+                            confirm_thres=opt.confirm_thres,
+                            alert_grace_sec=opt.alert_grace_sec)
 
     # remove unused arguments from opt
     del opt.cfg
@@ -258,6 +270,9 @@ def main(opt):
     del opt.no_alert
     del opt.no_notify
     del opt.notify_img
+    del opt.confirm_sec
+    del opt.confirm_thres
+    del opt.alert_grace_sec
 
     while True:
         to_notify = True
