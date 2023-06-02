@@ -7,11 +7,22 @@
         - [x] Attach detection image in notification
 - [ ] Deployable to Raspberry Pi
 
-## Live Detection Sample
+## Live Detection
+**RTSP Stream**
+```bash
+python live.py --weights poop.pt --view-img --nosave --notify-img --source rtsp://your_rtsp_url
+```
+
+**Testing with MP4 video**
+```bash
+python live.py --weights poop.pt --view-img --nosave --no-notify --source dataset/tests/test1.mp4
+```
+
+### Sample Detection
 ![alt text](./docs/sample.gif "Live Detection 1")
 
-## Use from yolov5 CLI
+## Testing from yolov5 CLI
 ### Inference
-```powershell
-yolov5 detect --conf-thres 0.7 --line-thickness 2 --view-img --weights model.pt --source dataset\tests\test1.mp4
+```bash
+yolov5 detect --conf-thres 0.7 --line-thickness 2 --view-img --weights poop.pt --source dataset/tests/test1.mp4
 ```

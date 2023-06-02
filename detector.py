@@ -64,7 +64,10 @@ class PoopDetector:
         poop_in_detections = self.is_poop_in_detections(pred)
         dog_in_detections = self.is_dog_in_detections(pred)
 
-        print(f'{datetime.now().strftime("%Y%m%d %H:%M:%S.%f")[:-3]}, Dog: {dog_in_detections}, Poop: {poop_in_detections}, fps: {fps}')
+        if fps > 0:
+            print(f'{datetime.now().strftime("%Y%m%d %H:%M:%S.%f")[:-3]}, Dog: {dog_in_detections}, Poop: {poop_in_detections}, fps: {fps}')
+        else:
+            print(f'{datetime.now().strftime("%Y%m%d %H:%M:%S.%f")[:-3]}, Dog: {dog_in_detections}, Poop: {poop_in_detections}')
 
         # add poop in detection to rolling window
         self._poop_detect_queue.append(1 if poop_in_detections else 0)
