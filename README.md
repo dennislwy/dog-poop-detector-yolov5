@@ -18,17 +18,12 @@ python live.py --weights poop.pt --view-img --nosave --notify-img --source rtsp:
 python live.py --weights poop.pt --view-img --nosave --no-notify --source dataset/tests/test1.mp4
 ```
 
-### Sample Detection
-![alt text](./docs/sample.gif "Live Detection 1")
+### Sample Detection 1
+![alt text](./docs/sample1.webp "Live Detection 1")
+### Sample Detection 2
+![alt text](./docs/sample2.webp "Live Detection 2")
 
-<video controls>
-  <source src="docs/sample1.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-https://github.com/dennislwy/dog-poop-detector-yolov5/raw/main/docs/sample1.mp4
-
-
-## Testing from yolov5 CLI
+## Use yolov5 CLI
 ### Inference
 ```bash
 yolov5 detect --conf-thres 0.7 --line-thickness 2 --view-img --weights poop.pt --source dataset/tests/test1.mp4
