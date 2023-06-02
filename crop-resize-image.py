@@ -33,7 +33,7 @@ def run(input,
 
     # Check if input is a folder
     elif os.path.isdir(input):
-        input_dir = input
+        input_dir = os.path.normpath(input)
 
         # Process all image files in the folder
         output_dir = get_output_dir(input_dir, output, suffix)
