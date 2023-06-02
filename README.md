@@ -25,6 +25,8 @@ python live.py --weights poop.pt --view-img --nosave --no-notify --source datase
   <source src="docs/sample1.mp4" type="video/mp4">
   Your browser does not support the video tag.
 </video>
+https://github.com/dennislwy/dog-poop-detector-yolov5/raw/main/docs/sample1.mp4
+
 
 ## Testing from yolov5 CLI
 ### Inference
