@@ -22,7 +22,7 @@ python live.py --weights poop.pt --view-img --nosave --no-notify --source datase
 ![alt text](./docs/sample.gif "Live Detection 1")
 
 <video controls>
-  <source src="./docs/sample1.mp4" type="video/mp4">
+  <source src="docs/sample1.mp4" type="video/mp4">
   Your browser does not support the video tag.
 </video>
 
