@@ -24,7 +24,7 @@ class PoopDetector:
                  logger,
                  confirm_sec = 3, # time to confirm if there is poop
                  confirm_thres = 0.75, # poop confirmation threshold
-                 alert_grace_sec = 900, # alert grace period (in seconds)
+                 alert_snooze_sec = 600, # alert snooze period (in seconds)
         ):
 
         self.log = logger
@@ -35,7 +35,7 @@ class PoopDetector:
         self.no_alert = no_alert
         self.no_notify = no_notify
         self.notify_img = notify_img
-        self._alert_grace_period_seconds = alert_grace_sec
+        self._alert_snooze_period_seconds = alert_snooze_sec
 
         # for measuring fps
         self.fps = 0.0
@@ -66,7 +66,7 @@ class PoopDetector:
         dog_in_detections = self.is_dog_in_detections(pred)
 
         if fps > 0:
-            print(f'{datetime.now().strftime("%Y%m%d %H:%M:%S.%f")[:-3]}, Dog: {dog_in_detections}, Poop: {poop_in_detections}, fps: {fps}')
+            print(f'{datetime.now().strftime("%Y%m%d %H:%M:%S.%f")[:-3]}, Dog: {dog_in_detections}, Poop: {poop_in_detections}, fps: {fps:.2f}')
         else:
             print(f'{datetime.now().strftime("%Y%m%d %H:%M:%S.%f")[:-3]}, Dog: {dog_in_detections}, Poop: {poop_in_detections}')
 
@@ -100,7 +100,7 @@ class PoopDetector:
         elapsed = time.time() - self._fps_measure_start  # Calculate elapsed time since measurement started
 
         if elapsed > 10:  # If more than 10 seconds have passed
-            self.fps = round(self._fps_cnt / elapsed, 2)  # Calculate FPS by dividing frame count by elapsed time
+            self.fps = self._fps_cnt / elapsed # Calculate FPS by dividing frame count by elapsed time
             self._fps_cnt = 0  # Reset frame count for the next measurement
 
         return self.fps  # Return the current FPS value
@@ -114,7 +114,7 @@ class PoopDetector:
     def reset_queue(self):
         self._queue_length.update(max(MIN_QUEUE_LENGTH, math.ceil(self.fps*self._poop_confirm_seconds)))
         if self._queue_length.changed():
-            self.log.info(f"FPS: {self.fps}, queue length adjusted to {self._queue_length.current}")
+            self.log.info(f"FPS: {self.fps:2f}, queue length adjusted to {self._queue_length.current}")
 
         self._poop_detect_queue = deque([0] * self._queue_length.current , maxlen=self._queue_length.current)
 
@@ -149,8 +149,8 @@ class PoopDetector:
         # update poop last confirmed time
         self._last_poop_confirmed_time = time.time()
 
-        # sound alert & send notification if exceeded alert grace period since last poop confirmed time
-        if last_poop_confirmed_elapsed_seconds >= self._alert_grace_period_seconds:
+        # sound alert & send notification if exceeded alert snooze period since last poop confirmed time
+        if last_poop_confirmed_elapsed_seconds >= self._alert_snooze_period_seconds:
 
             # play alert sound on another thread
             if not self.no_alert:

@@ -1,23 +1,13 @@
-import wave
-import pyaudio
+import pygame
+
+pygame_init = False
 
 def play_audio_file(file_path):
-    chunk = 1024  # Buffer size
-    wf = wave.open(file_path, 'rb')
-    pa = pyaudio.PyAudio()
+    global pygame_init
 
-    # Open the audio stream
-    stream = pa.open(format=pa.get_format_from_width(wf.getsampwidth()),
-                     channels=wf.getnchannels(),
-                     rate=wf.getframerate(),
-                     output=True)
+    if not pygame_init:
+        pygame.mixer.init()
+        pygame_init = True
 
-    # Read data in chunks and play it
-    data = wf.readframes(chunk)
-    while data:
-        stream.write(data)
-        data = wf.readframes(chunk)
-
-    # Close the stream
-    stream.close()
-    pa.terminate()
+    pygame.mixer.Sound(file_path).play()
+    # pygame.mixer.quit()

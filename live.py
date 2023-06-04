@@ -218,7 +218,7 @@ def parse_opt():
     parser.add_argument('--cfg', type=str, default='config.json', help='configuration file')
     parser.add_argument('--confirm-sec', type=float, default=2, help='time to confirm if there is poop')
     parser.add_argument('--confirm-thres', type=float, default=0.75, help='poop confirmation threshold')
-    parser.add_argument('--alert-grace-sec', type=int, default=900, help='poop alert grace period (in seconds)')
+    parser.add_argument('--alert-snooze-sec', type=int, default=600, help='poop alert snooze period (in seconds)')
 
     parser.add_argument('--weights', nargs='+', type=str, default='poop.pt', help='model path or triton URL')
     parser.add_argument('--source', type=str, default='0', help='file/dir/URL/glob/screen/0(webcam)')
@@ -262,7 +262,7 @@ def main(opt):
                             logger=log,
                             confirm_sec=opt.confirm_sec,
                             confirm_thres=opt.confirm_thres,
-                            alert_grace_sec=opt.alert_grace_sec)
+                            alert_snooze_sec=opt.alert_snooze_sec)
 
     # remove unused arguments from opt
     del opt.cfg
@@ -272,7 +272,7 @@ def main(opt):
     del opt.notify_img
     del opt.confirm_sec
     del opt.confirm_thres
-    del opt.alert_grace_sec
+    del opt.alert_snooze_sec
 
     while True:
         to_notify = True
