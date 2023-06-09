@@ -24,7 +24,7 @@ class PoopDetector:
                  logger,
                  confirm_sec = 3, # time to confirm if there is poop
                  confirm_thres = 0.75, # poop confirmation threshold
-                 alert_snooze_sec = 600, # alert snooze period (in seconds)
+                 alert_snooze_sec = 300, # alert snooze period (in seconds)
         ):
 
         self.log = logger
@@ -67,9 +67,9 @@ class PoopDetector:
         dog_in_detections = self.is_dog_in_detections(pred)
 
         if fps > 0:
-            print(f'{datetime.now().strftime("%Y%m%d %H:%M:%S.%f")[:-3]}, Dog: {dog_in_detections}, Poop: {poop_in_detections}, fps: {fps:.2f}')
+            print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]}, Dog: {dog_in_detections}, Poop: {poop_in_detections}, fps: {fps:.2f}')
         else:
-            print(f'{datetime.now().strftime("%Y%m%d %H:%M:%S.%f")[:-3]}, Dog: {dog_in_detections}, Poop: {poop_in_detections}')
+            print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]}, Dog: {dog_in_detections}, Poop: {poop_in_detections}')
 
         # add poop in detection to rolling window
         self._poop_detect_queue.append(1 if poop_in_detections else 0)

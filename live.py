@@ -201,7 +201,7 @@ def set_logger(debug=False):
     log_config = 'logging.ini'
     logging.config.fileConfig(log_config)
     log = logging.getLogger()
-    fileHandler = logging.handlers.TimedRotatingFileHandler(filename=f'{log_name}.log', when='D', interval=1, backupCount=14)
+    fileHandler = logging.handlers.TimedRotatingFileHandler(filename=f'{log_name}.log', when='midnight', interval=1, backupCount=14)
     logLevel = logging.DEBUG if debug else logging.INFO
     log.handlers[0].level = logLevel
     fileHandler.setLevel(logLevel)
@@ -218,7 +218,7 @@ def parse_opt():
     parser.add_argument('--cfg', type=str, default='config.json', help='configuration file')
     parser.add_argument('--confirm-sec', type=float, default=2, help='time to confirm if there is poop')
     parser.add_argument('--confirm-thres', type=float, default=0.75, help='poop confirmation threshold')
-    parser.add_argument('--alert-snooze-sec', type=int, default=600, help='poop alert snooze period (in seconds)')
+    parser.add_argument('--alert-snooze-sec', type=int, default=300, help='poop alert snooze period (in seconds)')
 
     parser.add_argument('--weights', nargs='+', type=str, default='poop.pt', help='model path or triton URL')
     parser.add_argument('--source', type=str, default='0', help='file/dir/URL/glob/screen/0(webcam)')
