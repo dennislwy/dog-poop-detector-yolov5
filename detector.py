@@ -41,6 +41,7 @@ class PoopDetector:
         self.fps = 0.0
         self._fps_cnt = 0
         self._fps_measure_start = 0
+        self._fps_refresh_sec = 10
 
         # for poop confirmation
         self._poop_confirm_seconds = confirm_sec
@@ -99,7 +100,7 @@ class PoopDetector:
 
         elapsed = time.time() - self._fps_measure_start  # Calculate elapsed time since measurement started
 
-        if elapsed > 10:  # If more than 10 seconds have passed
+        if elapsed > self._fps_refresh_sec:  # If more than 10 seconds have passed
             self.fps = self._fps_cnt / elapsed # Calculate FPS by dividing frame count by elapsed time
             self._fps_cnt = 0  # Reset frame count for the next measurement
 
