@@ -4,14 +4,14 @@ import math
 import threading
 import numpy as np
 from datetime import datetime
+from collections import Counter
 from utils.value import ValueTracker
 from collections import deque
 from utils.sound import play_audio_file
 from utils.pushbullet import INotification
 from yolov5.utils.general import cv2
 
-CLASS_DOG = 0 # dog detection class
-CLASS_POOP = 1 # poop detection class
+CLASS_POOP_LABEL = 'poop' # poop class label
 MIN_QUEUE_LENGTH = 3
 
 class PoopDetector:
@@ -43,6 +43,9 @@ class PoopDetector:
         self._fps_measure_start = 0
         self._fps_refresh_sec = 10
 
+        # for class count
+        self._detected_class_count = ValueTracker(initial_value={})
+
         # for poop confirmation
         self._poop_confirm_seconds = confirm_sec
         self._poop_confirm_threshold = confirm_thres
@@ -56,23 +59,29 @@ class PoopDetector:
         self._last_poop_check_time = time.time()
         self._last_poop_confirmed_time = 0
 
-    def process_detection(self, pred, im0):
-        fps = self.measure_fps()
+    def process_detection(self, model, pred, im0):
+        # measure detection processing speed (in fps)
+        self.measure_fps()
 
         # dynamically adjust detect queue length
-        if self._queue_length.current == 0 and fps > 0:
+        if self._queue_length.current == 0 and self.fps > 0:
             self.reset_queue()
 
-        poop_in_detections = self.is_poop_in_detections(pred)
-        dog_in_detections = self.is_dog_in_detections(pred)
+        # counts the number of detected objects for each class in the given prediction
+        self._detected_class_count.update(self.detected_class_counts(model, pred))
+        detected_class_and_counts_text = ', '.join([f"{class_label}: {count}" for class_label, count in self._detected_class_count.current.items()])
 
-        if fps > 0:
-            print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]}, Dog: {dog_in_detections}, Poop: {poop_in_detections}, fps: {fps:.2f}')
-        else:
-            print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]}, Dog: {dog_in_detections}, Poop: {poop_in_detections}')
+        # log when detected class count changed
+        if self._detected_class_count.changed() and len(detected_class_and_counts_text) > 0:
+            self.log.info(detected_class_and_counts_text)
+
+        # if self.fps > 0:
+        #     print(f'{datetime.now().strftime("%Y%m%d %H:%M:%S.%f")[:-3]}, {detected_class_and_counts_text}, fps: {self.fps:.2f}')
+        # else:
+        #     print(f'{datetime.now().strftime("%Y%m%d %H:%M:%S.%f")[:-3]}, {detected_class_and_counts_text}')
 
         # add poop in detection to rolling window
-        self._poop_detect_queue.append(1 if poop_in_detections else 0)
+        self._poop_detect_queue.append(1 if CLASS_POOP_LABEL in self._detected_class_count.current else 0)
 
         # is time to check rolling average?
         if time.time() < self._last_poop_check_time + self._poop_confirm_seconds:
@@ -84,7 +93,7 @@ class PoopDetector:
         # confirm got poop?
         if self.check_poop_confirmation():
             # poop confirmed
-            self.poop_confirmed(im0)
+            self.poop_confirmed(im0.copy())
 
     def measure_fps(self) -> float:
         """
@@ -106,11 +115,34 @@ class PoopDetector:
 
         return self.fps  # Return the current FPS value
 
-    def is_dog_in_detections(self, pred):
-        return CLASS_DOG in pred[0][:, -1]
+    def detected_class_counts(self, model, pred):
+        """
+        Counts the number of detected objects for each class in the given prediction.
 
-    def is_poop_in_detections(self, pred):
-        return CLASS_POOP in pred[0][:, -1]
+        Args:
+            model: The object detection model used for prediction.
+            pred: The prediction result from the model.
+
+        Returns:
+            A Counter object that maps each class label to the number of detected objects.
+        """
+
+        # Get the class labels from the model
+        class_labels = model.names
+
+        # Initialize a dictionary to store the counts of each class
+        class_counts_dict = Counter()
+
+        # Iterate over the detected objects in the prediction
+        for obj in pred[0]:
+            # Extract the class ID and label for the current object
+            class_id = int(obj[5])
+            class_label = class_labels[class_id]
+
+            # Update the class counts by incrementing the count for the detected class
+            class_counts_dict[class_label] += 1
+
+        return class_counts_dict
 
     def reset_queue(self):
         self._queue_length.update(max(MIN_QUEUE_LENGTH, math.ceil(self.fps*self._poop_confirm_seconds)))
@@ -141,7 +173,7 @@ class PoopDetector:
         # poop confirmed
         return True
 
-    def poop_confirmed(self, im0):
+    def poop_confirmed(self, im):
         self.log.info("Poop confirmed")
 
         # calculate elapsed time (in seconds) since last poop confirmation
@@ -160,7 +192,7 @@ class PoopDetector:
             # send notification on another thread
             if not self.no_notify:
                 if self.notify_img:
-                    threading.Thread(target=self.push_text_img, args=(im0,)).start()
+                    threading.Thread(target=self.push_text_img, args=(im,)).start()
                 else:
                     threading.Thread(target=self.push_text).start()
 

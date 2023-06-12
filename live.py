@@ -155,7 +155,7 @@ def run(
             im0 = annotator.result()
 
             # process detection
-            detector.process_detection(pred, im0)
+            detector.process_detection(model, pred, im0)
 
             if view_img:
                 if platform.system() == 'Linux' and p not in windows:
@@ -201,7 +201,7 @@ def set_logger(debug=False):
     log_config = 'logging.ini'
     logging.config.fileConfig(log_config)
     log = logging.getLogger()
-    fileHandler = logging.handlers.TimedRotatingFileHandler(filename=f'{log_name}.log', when='midnight', interval=1, backupCount=14)
+    fileHandler = logging.handlers.TimedRotatingFileHandler(filename=f'{log_name}.log', when='midnight', backupCount=7)
     logLevel = logging.DEBUG if debug else logging.INFO
     log.handlers[0].level = logLevel
     fileHandler.setLevel(logLevel)
