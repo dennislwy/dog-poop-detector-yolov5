@@ -60,6 +60,15 @@ class PoopDetector:
         self._last_poop_confirmed_time = 0
 
     def process_detection(self, model, pred, im0):
+        """
+        Processes the detection results, including measuring processing speed, adjusting queue length, counting detected objects,
+        logging changes in detected class counts, updating the poop detection queue, and checking for confirmed poop.
+
+        Args:
+            model: The object detection model used for prediction.
+            pred: The prediction result from the model.
+            im0: The original image on which the detection was performed.
+        """
         # measure detection processing speed (in fps)
         self.measure_fps()
 
@@ -83,17 +92,17 @@ class PoopDetector:
         # add poop in detection to rolling window
         self._poop_detect_queue.append(1 if CLASS_POOP_LABEL in self._detected_class_count.current else 0)
 
-        # is time to check rolling average?
+        # Check if it's time to check the rolling average for poop confirmation
         if time.time() < self._last_poop_check_time + self._poop_confirm_seconds:
             return
 
         # update last poop check time
         self._last_poop_check_time = time.time()
 
-        # confirm got poop?
+        # Check if poop is confirmed
         if self.check_poop_confirmation():
-            # poop confirmed
-            self.poop_confirmed(im0.copy())
+            # Poop is confirmed, perform actions for poop confirmation
+            self.poop_confirmed(im0)
 
     def measure_fps(self) -> float:
         """
@@ -144,36 +153,51 @@ class PoopDetector:
 
         return class_counts_dict
 
-    def reset_queue(self):
-        self._queue_length.update(max(MIN_QUEUE_LENGTH, math.ceil(self.fps*self._poop_confirm_seconds)))
-        if self._queue_length.changed():
-            self.log.info(f"FPS: {self.fps:2f}, queue length adjusted to {self._queue_length.current}")
-
-        self._poop_detect_queue = deque([0] * self._queue_length.current , maxlen=self._queue_length.current)
-
     def check_poop_confirmation(self):
+        """
+        Checks if poop has been confirmed based on the rolling average of poop detections.
+
+        Returns:
+            True if poop is confirmed, False otherwise.
+        """
+
         # update poop detection rolling average
         self._rolling_avg.update(np.mean(self._poop_detect_queue))
 
-        # return if average value no change or queue yet fully fill
+        # return if average value no change
         if not self._rolling_avg.changed():
             return False
 
         # log poop likelihood
         self.log.info(f'Poop likelihood: {round(self._rolling_avg.current*100, 2)}%')
 
-        # poop confirmed when poop detection rolling average >= poop confirmation threshold
+        # Check if the poop detection rolling average is below the confirmation threshold
         if self._rolling_avg.current < self._poop_confirm_threshold:
             return False
 
         # clear once poop confirmed, helps w/ trailing additional poop detections due to filled queue
-        # self._poop_detect_queue.clear()
         self.reset_queue()
 
         # poop confirmed
         return True
 
-    def poop_confirmed(self, im):
+    def reset_queue(self):
+        """
+        Resets the poop detection queue to its initial state.
+        """
+        self._queue_length.update(max(MIN_QUEUE_LENGTH, math.ceil(self.fps*self._poop_confirm_seconds)))
+        if self._queue_length.changed():
+            self.log.info(f"FPS: {self.fps:2f}, queue length adjusted to {self._queue_length.current}")
+
+        self._poop_detect_queue = deque([0] * self._queue_length.current , maxlen=self._queue_length.current)
+
+    def poop_confirmed(self, im0):
+        """
+        Performs actions when poop is confirmed, such as playing an alert sound and sending a notification.
+
+        Args:
+            im: The image related to the poop detection.
+        """
         self.log.info("Poop confirmed")
 
         # calculate elapsed time (in seconds) since last poop confirmation
@@ -183,18 +207,21 @@ class PoopDetector:
         self._last_poop_confirmed_time = time.time()
 
         # sound alert & send notification if exceeded alert snooze period since last poop confirmed time
-        if last_poop_confirmed_elapsed_seconds >= self._alert_snooze_period_seconds:
+        if last_poop_confirmed_elapsed_seconds < self._alert_snooze_period_seconds:
+            return
 
-            # play alert sound on another thread
-            if not self.no_alert:
-                threading.Thread(target=self.play_alert).start()
+        im1 = im0.copy()
 
-            # send notification on another thread
-            if not self.no_notify:
-                if self.notify_img:
-                    threading.Thread(target=self.push_text_img, args=(im,)).start()
-                else:
-                    threading.Thread(target=self.push_text).start()
+        # play alert sound on another thread
+        if not self.no_alert:
+            threading.Thread(target=self.play_alert).start()
+
+        # send notification on another thread
+        if not self.no_notify:
+            if self.notify_img:
+                threading.Thread(target=self.push_text_img, args=(im1,)).start()
+            else:
+                threading.Thread(target=self.push_text).start()
 
     def play_alert(self):
         self.log.info(f"Playing alert '{self.sound}'")
