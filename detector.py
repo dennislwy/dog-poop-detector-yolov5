@@ -81,8 +81,11 @@ class PoopDetector:
         detected_class_and_counts_text = ', '.join([f"{class_label}: {count}" for class_label, count in self._detected_class_count.current.items()])
 
         # log when detected class count changed
-        if self._detected_class_count.changed():
-            self.log.info(detected_class_and_counts_text if len(detected_class_and_counts_text) > 0 else 'No detection')
+        # if self._detected_class_count.changed():
+        #     self.log.info(detected_class_and_counts_text if len(detected_class_and_counts_text) > 0 else 'No detection')
+
+        if self._detected_class_count.changed() and len(detected_class_and_counts_text) > 0 :
+            self.log.info(detected_class_and_counts_text)
 
         # if self.fps > 0:
         #     print(f'{datetime.now().strftime("%Y%m%d %H:%M:%S.%f")[:-3]}, {detected_class_and_counts_text}, fps: {self.fps:.2f}')
