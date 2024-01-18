@@ -6,7 +6,7 @@ temp/
 dataset.zip
 dataset-*.yaml
 config-*.json
-live.bat
+live*.bat
 live.sh
 *.cache
 .vscode
@@ -14,6 +14,7 @@ live.sh
 .pytest_cache
 **/__pycache__
 venv/*
+.venv/*
 .idea/
 log/
 *.log
