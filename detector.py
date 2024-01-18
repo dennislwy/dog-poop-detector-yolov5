@@ -15,6 +15,10 @@ CLASS_POOP_LABEL = 'poop' # poop class label
 MIN_QUEUE_LENGTH = 3
 
 class PoopDetector:
+    """
+    PoopDetector class responsible for detecting poop in images.
+    """
+
     def __init__(self,
                  sound,
                  no_alert,
@@ -26,7 +30,20 @@ class PoopDetector:
                  confirm_thres = 0.75, # poop confirmation threshold
                  alert_snooze_sec = 300, # alert snooze period (in seconds)
         ):
+        """
+        Initializes a PoopDetector object.
 
+        Args:
+            sound: The sound file to be played when poop is confirmed.
+            no_alert: A boolean indicating whether to disable the alert sound.
+            notify_img: A boolean indicating whether to include an image in the notification.
+            no_notify: A boolean indicating whether to disable the notification.
+            notifier: An object implementing the INotification interface for sending notifications.
+            logger: The logger object for logging messages.
+            confirm_sec: The time (in seconds) to confirm if there is poop.
+            confirm_thres: The poop confirmation threshold.
+            alert_snooze_sec: The alert snooze period (in seconds).
+        """
         self.log = logger
         self.notifier = notifier
         self.sound = sound
@@ -227,24 +244,64 @@ class PoopDetector:
                 threading.Thread(target=self.push_text).start()
 
     def play_alert(self):
+        """
+        Plays the alert sound specified by `self.sound`.
+
+        This method logs the alert being played and then plays the audio file.
+
+        Parameters:
+        - None
+
+        Returns:
+        - None
+        """
         self.log.info(f"Playing alert '{self.sound}'")
         play_audio_file(self.sound)
 
     def push_text(self):
+        """
+        Pushes a text notification indicating that a dog has pooped.
+        """
         self.log.info("Pushing text")
         now_str = datetime.now().strftime("%I:%M:%S %p")
         self.notifier.text(f'{now_str} - Dog pooped!')
 
-    def push_file(self, filepath, msg = None, title = None):
+    def push_file(self, filepath, msg=None, title=None):
+        """
+        Pushes a file to the notifier with an optional message and title.
+
+        Args:
+            filepath (str): The path to the file to be pushed.
+            msg (str, optional): The message to be included with the file. Defaults to None.
+            title (str, optional): The title of the file. Defaults to None.
+        """
         self.log.info("Pushing text & image")
         self.notifier.file(filepath, msg, title)
 
     def push_text_img(self, im0):
+        """
+        Pushes the image with a text indicating that a dog has pooped.
+
+        Args:
+            im0 (numpy.ndarray): The input image.
+
+        Returns:
+            None
+        """
         filepath = self.save_image(im0)
         now_str = datetime.now().strftime("%I:%M:%S %p")
         self.push_file(filepath, f'{now_str} - Dog pooped!')
 
     def save_image(self, im0):
+        """
+        Saves the input image to a file in the temporary folder.
+
+        Args:
+            im0 (numpy.ndarray): The input image to be saved.
+
+        Returns:
+            str: The file path of the saved image.
+        """
         # use current time as output filename with the .jpg extension
         filename = f'poop-{datetime.now().strftime("%Y%m%d-%H%M%S")}.jpg'
 

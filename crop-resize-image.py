@@ -2,13 +2,27 @@ import os
 import argparse
 from PIL import Image
 
-def run(input,
-        output,
-        crop_from,
-        imgsz,
-        prefix,
-        suffix='cropped-resized'
+def run(input: str,
+        output: str,
+        crop_from: str,
+        imgsz: int,
+        prefix: str,
+        suffix: str = 'cropped-resized'
     ):
+    """
+    Process the input image or folder of images by cropping and resizing them.
+
+    Args:
+        input (str): Path to the input image file or folder of images.
+        output (str): Path to the output directory where processed images will be saved.
+        crop_from (str): Crop position for the images. Can be 'top', 'bottom', 'left', 'right', or 'center'.
+        imgsz (int): Size of the output images in pixels.
+        prefix (str): Prefix to be added to the output image filenames.
+        suffix (str, optional): Suffix to be added to the output image filenames. Defaults to 'cropped-resized'.
+
+    Returns:
+        None
+    """
     processed = 0
 
     # check if input is a file
@@ -55,10 +69,31 @@ def run(input,
     print(f"{processed} image{'s' if processed>1 else ''} processed")
 
 def is_image_file(file_path):
+    """
+    Check if a file path corresponds to an image file.
+
+    Args:
+        file_path (str): The path of the file to check.
+
+    Returns:
+        bool: True if the file is an image file, False otherwise.
+    """
     image_extensions = ['.jpg', '.jpeg', '.png', '.bmp']
     return any(file_path.lower().endswith(ext) for ext in image_extensions)
 
 def process_image(input_file, output_file, crop_from, size):
+    """
+    Process the input image by cropping and resizing it.
+
+    Args:
+        input_file (str): The path to the input image file.
+        output_file (str): The path to save the modified image.
+        crop_from (tuple): The coordinates to crop the image from (left, upper, right, lower).
+        size (int): The desired width of the resized image.
+
+    Returns:
+        bool: True if the image was processed and saved successfully, False otherwise.
+    """
     try:
         # Load the image
         image = Image.open(input_file)
@@ -78,6 +113,19 @@ def process_image(input_file, output_file, crop_from, size):
         return False
 
 def get_output_filename(input_file, output, prefix, suffix):
+    """
+    Constructs the output filename based on the input file, output path, prefix, and suffix.
+
+    Args:
+        input_file (str): The path of the input file.
+        output (str or None): The path of the output file or folder. If None, the output file will be saved in the same directory as the input file.
+        prefix (str): The prefix to be added to the filename.
+        suffix (str): The suffix to be added to the filename.
+
+    Returns:
+        str: The output filename.
+
+    """
     base_name = os.path.basename(input_file)
     name, ext = os.path.splitext(base_name)
     filename = f"{prefix}-{name}" if prefix else name
@@ -92,13 +140,33 @@ def get_output_filename(input_file, output, prefix, suffix):
     return os.path.join(output, filename)
 
 def get_output_dir(input_dir, output, suffix):
-    # output is a folder
+    """
+    Get the output directory based on the input directory, output name, and suffix.
+
+    Parameters:
+        input_dir (str): The input directory.
+        output (str): The output name.
+        suffix (str): The suffix to be appended to the output directory.
+
+    Returns:
+        str: The output directory.
+    """
     if output and not os.path.splitext(output)[1]:
         return output
     else:
         return f"{input_dir}-{suffix}"
 
 def crop_image(image, crop_from):
+    """
+    Crop the input image based on the specified cropping position.
+
+    Args:
+        image (PIL.Image.Image): The input image to be cropped.
+        crop_from (str): The position from which to crop the image. Allowed values are 'none', 'left', 'middle', 'right'.
+
+    Returns:
+        PIL.Image.Image: The cropped image.
+    """
     if crop_from == 'none':
         return image
 
@@ -127,6 +195,20 @@ def crop_image(image, crop_from):
     return image.crop((left, top, right, bottom))
 
 def resize_image(image, width=None, height=None):
+    """
+    Resize the given image while maintaining the aspect ratio.
+
+    Args:
+        image (PIL.Image.Image): The image to be resized.
+        width (int, optional): The desired width of the resized image. If not specified, the width will be calculated based on the specified height while maintaining the aspect ratio. Default is None.
+        height (int, optional): The desired height of the resized image. If not specified, the height will be calculated based on the specified width while maintaining the aspect ratio. Default is None.
+
+    Returns:
+        PIL.Image.Image: The resized image.
+
+    Raises:
+        ValueError: If both width and height are specified, or if neither width nor height are specified.
+    """
     # Get the original width and height
     w, h = image.size
 
@@ -146,6 +228,12 @@ def resize_image(image, width=None, height=None):
     return image.resize((new_width, new_height))
 
 def parse_opt():
+    """
+    Parse command line arguments for image cropping & resizing tool.
+
+    Returns:
+        opt (argparse.Namespace): Parsed command line arguments.
+    """
     parser = argparse.ArgumentParser(description='Image cropping & resizing tool')
     parser.add_argument('--input', type=str, required=True, help='input of image file or folder')
     parser.add_argument('--output', type=str, default=None, help='output of image file or folder (Optional)')
