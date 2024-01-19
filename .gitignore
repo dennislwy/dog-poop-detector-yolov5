@@ -6,8 +6,8 @@ temp/
 dataset.zip
 dataset-*.yaml
 config-*.json
-live*.bat
-live.sh
+live*.*
+!live.py
 *.cache
 .vscode
 .ipynb_checkpoints

@@ -1,13 +1,8 @@
-import pygame
-
-pygame_init = False
+from playsound import playsound
 
 def play_audio_file(file_path):
-    global pygame_init
+    playsound(file_path)
 
-    if not pygame_init:
-        pygame.mixer.init()
-        pygame_init = True
 
-    pygame.mixer.Sound(file_path).play()
-    # pygame.mixer.quit()
+if __name__ == "__main__":
+    play_audio_file("sounds/police.wav")
