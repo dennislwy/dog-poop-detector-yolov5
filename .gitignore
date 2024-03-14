@@ -1,6 +1,8 @@
 *.pt
 !poop.pt
-dataset/
+dataset/*
+# !dataset/images
+# !dataset/labels
 runs/
 temp/
 dataset.zip
@@ -8,13 +10,14 @@ dataset-*.yaml
 config-*.json
 live*.*
 !live.py
+
 *.cache
 .vscode
 .ipynb_checkpoints
 .pytest_cache
 **/__pycache__
 venv/*
-.venv/*
+.venv*
 .idea/
 log/
 *.log

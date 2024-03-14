@@ -1,5 +1,5 @@
 # Dog Poop Detector using YOLOv5
-[![Python >=3.9](https://img.shields.io/badge/python-3.10%20|%203.11%20-blue.svg)](https://www.python.org/downloads/release/python-390/)
+[![Python 3.9](https://img.shields.io/badge/python-3.9%20-blue.svg)](https://www.python.org/downloads/release/python-390/)
 
 ## Features
 - [x] Live detect when dog pooped
@@ -25,11 +25,12 @@ git clone https://github.com/dennislwy/dog-poop-detector-yolov5.git
 2. Navigate to the project directory:
 ```
 cd dog-poop-detector-yolov5
+poetry config --local virtualenvs.in-project true
 ```
 
 3. Install the project dependencies:
 ```
-poetry install
+poetry install --only main -v
 ```
 This will install all the dependencies listed in the `pyproject.toml` file.
 

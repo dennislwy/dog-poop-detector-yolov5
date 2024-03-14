@@ -15,10 +15,12 @@ def run(input: str,
     Args:
         input (str): Path to the input image file or folder of images.
         output (str): Path to the output directory where processed images will be saved.
-        crop_from (str): Crop position for the images. Can be 'top', 'bottom', 'left', 'right', or 'center'.
+        crop_from (str): Crop position for the images. Can be 'top', 'bottom', 'left',
+        'right', or 'center'.
         imgsz (int): Size of the output images in pixels.
         prefix (str): Prefix to be added to the output image filenames.
-        suffix (str, optional): Suffix to be added to the output image filenames. Defaults to 'cropped-resized'.
+        suffix (str, optional): Suffix to be added to the output image filenames.
+        Defaults to 'cropped-resized'.
 
     Returns:
         None
@@ -118,8 +120,12 @@ def get_output_filename(input_file, output, prefix, suffix):
 
     Args:
         input_file (str): The path of the input file.
-        output (str or None): The path of the output file or folder. If None, the output file will be saved in the same directory as the input file.
+
+        output (str or None): The path of the output file or folder. If None, the output file
+        will be saved in the same directory as the input file.
+
         prefix (str): The prefix to be added to the filename.
+
         suffix (str): The suffix to be added to the filename.
 
     Returns:
@@ -162,7 +168,9 @@ def crop_image(image, crop_from):
 
     Args:
         image (PIL.Image.Image): The input image to be cropped.
-        crop_from (str): The position from which to crop the image. Allowed values are 'none', 'left', 'middle', 'right'.
+
+        crop_from (str): The position from which to crop the image. Allowed values are 'none'
+        , 'left', 'middle', 'right'.
 
     Returns:
         PIL.Image.Image: The cropped image.
@@ -185,7 +193,8 @@ def crop_image(image, crop_from):
     elif crop_from == 'right':
         left = width - new_width
     else:
-        raise ValueError(f"Invalid crop_from value '{crop_from}'. Allowed values are 'left', 'middle', 'right'.")
+        raise ValueError(f"Invalid crop_from value '{crop_from}'. Allowed values are 'left'" +
+                         ", 'middle', 'right'.")
 
     top = height - new_height
     right = left + new_width
@@ -200,14 +209,21 @@ def resize_image(image, width=None, height=None):
 
     Args:
         image (PIL.Image.Image): The image to be resized.
-        width (int, optional): The desired width of the resized image. If not specified, the width will be calculated based on the specified height while maintaining the aspect ratio. Default is None.
-        height (int, optional): The desired height of the resized image. If not specified, the height will be calculated based on the specified width while maintaining the aspect ratio. Default is None.
+
+        width (int, optional): The desired width of the resized image. If not specified, the
+        width will be calculated based on the specified height while maintaining the aspect
+        ratio. Default is None.
+
+        height (int, optional): The desired height of the resized image. If not specified, the
+        height will be calculated based on the specified width while maintaining the aspect
+        ratio. Default is None.
 
     Returns:
         PIL.Image.Image: The resized image.
 
     Raises:
-        ValueError: If both width and height are specified, or if neither width nor height are specified.
+        ValueError: If both width and height are specified, or if neither width nor height are
+        specified.
     """
     # Get the original width and height
     w, h = image.size
@@ -236,14 +252,27 @@ def parse_opt():
     """
     parser = argparse.ArgumentParser(description='Image cropping & resizing tool')
     parser.add_argument('--input', type=str, required=True, help='input of image file or folder')
-    parser.add_argument('--output', type=str, default=None, help='output of image file or folder (Optional)')
-    parser.add_argument('--crop-from', type=str, default='middle', help="reference point to crop image into square dimension (i.e. none, left, middle, right)")
-    parser.add_argument('--imgsz', type=int, default=640, help='width & height (pixels) of output image. Default 640')
-    parser.add_argument('--prefix', type=str, default=None, help="filename prefix of output image. Default ''")
+    parser.add_argument('--output', type=str, default=None, help='output of image file or folder ' +
+                        '(Optional)')
+    parser.add_argument('--crop-from', type=str, default='middle', help='reference point to crop ' +
+                        'image into square dimension (i.e. none, left, middle, right)')
+    parser.add_argument('--imgsz', type=int, default=640, help='width & height (pixels) of output' +
+                        ' image. Default 640')
+    parser.add_argument('--prefix', type=str, default=None, help="filename prefix of output image" +
+                        ". Default ''")
     opt = parser.parse_args()
     return opt
 
 def main(opt):
+    """
+    Main function to run the program.
+
+    Args:
+        opt: An object containing the program options.
+
+    Returns:
+        None
+    """
     run(**vars(opt))
 
 if __name__ == '__main__':
