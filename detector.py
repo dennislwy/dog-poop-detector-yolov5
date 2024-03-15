@@ -11,7 +11,7 @@ from utils.sound import play_audio_file
 from utils.pushbullet import INotification
 from yolov5.utils.general import cv2
 
-CLASS_POOP_LABEL = 'poop' # poop class label
+CLASS_OF_INTEREST = ['poop', 'cotton']
 MIN_QUEUE_LENGTH = 3
 
 class PoopDetector:
@@ -110,7 +110,9 @@ class PoopDetector:
         #     print(f'{datetime.now().strftime("%Y%m%d %H:%M:%S.%f")[:-3]}, {detected_class_and_counts_text}')
 
         # add poop in detection to rolling window
-        self._poop_detect_queue.append(1 if CLASS_POOP_LABEL in self._detected_class_count.current else 0)
+        class_of_interest_found = any(item in self._detected_class_count.current
+                                      for item in CLASS_OF_INTEREST)
+        self._poop_detect_queue.append(1 if class_of_interest_found else 0)
 
         # Check if it's time to check the rolling average for poop confirmation
         if time.time() < self._last_poop_check_time + self._poop_confirm_seconds:
