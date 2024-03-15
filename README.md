@@ -12,7 +12,7 @@
 This project uses [Poetry](https://python-poetry.org/) for package management. If you don't have Poetry installed, you can install it using the following command:
 
 ```bash
-pip install poetry
+pip install poetry wheel
 ```
 
 Once you have Poetry installed, you can install the project dependencies using the following steps:
@@ -25,11 +25,11 @@ git clone https://github.com/dennislwy/dog-poop-detector-yolov5.git
 2. Navigate to the project directory:
 ```
 cd dog-poop-detector-yolov5
-poetry config --local virtualenvs.in-project true
 ```
 
 3. Install the project dependencies:
 ```
+poetry config --local virtualenvs.in-project true
 poetry install --only main -v
 ```
 This will install all the dependencies listed in the `pyproject.toml` file.

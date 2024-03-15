@@ -5,19 +5,19 @@ description = "Dog Poop Detector using YOLOv5"
 authors = ["Dennis Lee <wylee2000@gmail.com>"]
 license = "MIT"
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.9"
 pushbullet-py = "^0.12.0"
-wheel = "^0.42.0"
-playsound = "^1.3.0"
 yolov5 = "^7.0.13"
+playsound = "^1.3.0"
 
 [tool.poetry.group.label.dependencies]
-labelImg = "^1.8.6"
+labelimg = "^1.8.6"
 
-[tool.poetry.group.train.dependencies]
-notebook = "^7.0.6"
+[tool.poetry.group.jupyter.dependencies]
+notebook = "^7.1.2"
 
 [build-system]
 requires = ["poetry-core"]
