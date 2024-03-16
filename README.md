@@ -37,18 +37,18 @@ This will install all the dependencies listed in the `pyproject.toml` file.
 Now, you should be able to run the project. For example, to start live detection with an RTSP stream, you can use the following command:
 
 ```bash
-python live.py --weights poop.pt --view-img --nosave --notify-img --source rtsp://your_rtsp_url
+python live.py --weights best.pt --view-img --nosave --notify-img --source rtsp://your_rtsp_url
 ```
 
 ## Live Detection
 **RTSP Stream**
 ```bash
-python live.py --weights poop.pt --view-img --nosave --notify-img --source rtsp://your_rtsp_url
+python live.py --weights best.pt --view-img --nosave --notify-img --source rtsp://your_rtsp_url
 ```
 
 **Testing with MP4 video**
 ```bash
-python live.py --weights poop.pt --view-img --nosave --no-notify --source dataset/tests/test1.mp4
+python live.py --weights best.pt --view-img --nosave --no-notify --source dataset/tests/test1.mp4
 ```
 
 ### Sample Detection 1
@@ -59,5 +59,5 @@ python live.py --weights poop.pt --view-img --nosave --no-notify --source datase
 ## Use yolov5 CLI
 ### Inference
 ```bash
-yolov5 detect --conf-thres 0.7 --line-thickness 2 --view-img --weights poop.pt --source dataset/tests/test1.mp4
+yolov5 detect --conf-thres 0.7 --line-thickness 2 --view-img --weights best.pt --source dataset/tests/test1.mp4
 ```

@@ -220,7 +220,7 @@ def parse_opt():
     parser.add_argument('--confirm-thres', type=float, default=0.75, help='poop confirmation threshold')
     parser.add_argument('--alert-snooze-sec', type=int, default=60, help='poop alert snooze period (in seconds)')
 
-    parser.add_argument('--weights', nargs='+', type=str, default='poop.pt', help='model path or triton URL')
+    parser.add_argument('--weights', nargs='+', type=str, default='best.pt', help='model path or triton URL')
     parser.add_argument('--source', type=str, default='0', help='file/dir/URL/glob/screen/0(webcam)')
     # parser.add_argument('--source', type=str, default='dataset/images', help='file/dir/URL/glob/screen/0(webcam)')
     parser.add_argument('--data', type=str, default='dataset.yaml', help='dataset.yaml path')
