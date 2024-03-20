@@ -1,8 +1,8 @@
 *.pt
 !best.pt
 dataset/*
-# !dataset/images
-# !dataset/labels
+!dataset/images
+!dataset/labels
 runs/
 temp/
 dataset.zip
@@ -11,6 +11,7 @@ config-*.json
 live*.*
 !live.py
 
+cotton*.*
 *.cache
 .vscode
 .ipynb_checkpoints
